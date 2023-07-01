@@ -1,0 +1,12 @@
+/NativeVMBridge/Windows/.vs/
+/NativeVMBridge/Windows/Build/
+/JavaBackend/target/
+/JavaBackend/table.iml
+/JavaBackend/logs/
+/JavaBackend/backend/
+/JavaBackend/.idea/
+/.idea/
+/Electron/backend/
+/Electron/logs/
+/Electron/node_modules/
+/Electron/dist_electron/
