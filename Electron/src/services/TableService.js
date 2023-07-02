@@ -44,4 +44,26 @@ export class TableService {
         });
     }
 
+    @Get("/tables/${tableId}/${page}/rows")
+    loadTableRowsByPage(tableId, pageNo) {
+        return new NetRequest({
+            tableId: tableId,
+            page: pageNo
+        });
+    }
+
+    @Post("/tables/${tableId}/rows")
+    addTableRow(tableId, data) {
+        return new NetRequest({
+            tableId: tableId
+        }, data);
+    }
+
+    @Post("/tables/${rowId}/update")
+    updateTableRow(rowId, data) {
+        return new NetRequest({
+            rowId: rowId
+        },data)
+    }
+
 }

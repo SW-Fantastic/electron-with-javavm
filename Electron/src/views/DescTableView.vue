@@ -24,7 +24,7 @@
             @on-contextmenu="showTableContextMenu">
         </Table>
         <div style="display: flex;flex-direction: row;justify-content: flex-end;align-items: center;padding: 12px;">
-            <Page :total="pages"></Page>
+            <Page :page-size="pageSize" :total="totalElems" v-model="currentPage" @on-change="pageChanged"></Page>
         </div>
     </div>
 </template>
@@ -70,8 +70,9 @@ export default {
                 key: "desc"
             }],
             tableItems: [],
-            pages: 0,
-            currentPage: 0,
+            totalElems: 0,
+            pageSize: 20,
+            currentPage: 1,
         }
     },
     mounted() {
@@ -80,7 +81,7 @@ export default {
             const currHeight = window.visualViewport.height;
             self.tableHeight = currHeight - 186;
         })
-        this.loadPage(this.currentPage);
+        this.loadPage(this.currentPage - 1);
     },
     unmounted() {
         window.removeEventListener("resize",this.resizeListener);
@@ -136,11 +137,13 @@ export default {
         },
         loadPage(no) {
             const tableService = this.services.tableService;
-            tableService.loadTablesByPage(this.typeNode.id, no).then(resp => {
+            return tableService.loadTablesByPage(this.typeNode.id, no).then(resp => {
                 if(resp.status === "Success") {
                     const data = resp.data;
-                    this.pages = data.totalPages
-                    this.currentPage = data.number;
+                    
+                    this.totalElems = data.totalElements;
+                    this.pageSize = data.size;
+
                     this.tableItems = data.content;
                 }
             });
@@ -155,12 +158,15 @@ export default {
           this.$refs.ctxMenu.onCtxMenu(row,event,pos);
         },
         onDrawerHide() {
-            this.loadPage(this.currentPage);
+            this.loadPage(this.currentPage - 1);
         },
         showTable(row) {
             this.refreshItem(row).then(data => {
                 this.$refs.tableDrawer.show(data);
             })
+        },
+        pageChanged(num) {
+            this.loadPage(num - 1);
         }
     }
 }

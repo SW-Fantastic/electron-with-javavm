@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Entity
 public class StoredColumn {
 
@@ -28,6 +30,16 @@ public class StoredColumn {
     @JoinColumn(name = "table_id")
     @ManyToOne(cascade = CascadeType.DETACH)
     private StoredTable table;
+
+
+    @Getter
+    @Setter
+    @OneToMany(
+            fetch = FetchType.LAZY,
+            mappedBy = "column"
+    )
+    private List<StoredRowEntry> entries;
+
 
     private int orderIndex;
 

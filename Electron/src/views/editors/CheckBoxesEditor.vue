@@ -21,6 +21,21 @@ export default {
             this.refreshItems();
         },
         modelValue(val) {
+            this.refreshState(val);
+        }
+    },
+    data() {
+        return {
+            items: [],
+            values: {}
+        }
+    },
+    created() {
+        this.refreshItems();
+        this.refreshState(this.modelValue);
+    },
+    methods: {
+        refreshState(val) {
             if(!val) {
                 this.values = {};
                 return;
@@ -34,18 +49,7 @@ export default {
                     this.values[key] = true;
                 }
             }
-        }
-    },
-    data() {
-        return {
-            items: [],
-            values: {}
-        }
-    },
-    created() {
-        this.refreshItems()
-    },
-    methods: {
+        },
         refreshItems() {
             if(this.exp) {
                 this.items = this.exp.split("/");

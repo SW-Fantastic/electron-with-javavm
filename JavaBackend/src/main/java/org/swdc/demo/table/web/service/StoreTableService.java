@@ -1,6 +1,8 @@
 package org.swdc.demo.table.web.service;
 
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -10,15 +12,10 @@ import org.swdc.demo.table.entity.StoredColumn;
 import org.swdc.demo.table.entity.StoredColumnType;
 import org.swdc.demo.table.entity.StoredFolder;
 import org.swdc.demo.table.entity.StoredTable;
-import org.swdc.demo.table.repo.StoredColumnRepository;
-import org.swdc.demo.table.repo.StoredColumnTypeRepository;
-import org.swdc.demo.table.repo.StoredFolderRepository;
-import org.swdc.demo.table.repo.StoredTableRepository;
+import org.swdc.demo.table.repo.*;
 import org.swdc.demo.table.web.dtos.TableRequests;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,7 +31,12 @@ public class StoreTableService {
     private StoredColumnTypeRepository typeRepository;
 
     @Autowired
+    private StoredRowEntryRepository entryRepository;
+
+    @Autowired
     private StoredFolderRepository folderRepository;
+
+    private Logger logger = LoggerFactory.getLogger(StoreTableService.class);
 
     public Page<StoredTable> getTables(Long folderId, Integer pageNo) {
         if (folderId == null || folderId < 0) {
@@ -109,7 +111,9 @@ public class StoreTableService {
                 storedColumns.add(columnRepository.save(target));
             }
         }
-        for (StoredColumn column: columns) {
+        for (StoredColumn column: existsMap.values()) {
+            int removed = entryRepository.deleteByColumns(column.getId());
+            logger.warn("there are " + removed + " entries has removed.");
             columnRepository.delete(column);
         }
         table.setColumns(storedColumns);

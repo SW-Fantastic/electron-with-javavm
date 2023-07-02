@@ -25,6 +25,9 @@ export default {
             this.content = val;
         }
     },
+    created() {
+      this.content = this.modelValue;  
+    },
     methods : {
         
     }

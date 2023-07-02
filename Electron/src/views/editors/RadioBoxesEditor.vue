@@ -31,7 +31,8 @@ export default {
         }
     },
     created() {
-        this.refreshItems()
+        this.refreshItems();
+        this.select = this.modelValue;
     },
     methods: {
         refreshItems() {
