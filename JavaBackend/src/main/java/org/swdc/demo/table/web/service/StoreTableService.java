@@ -8,10 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.swdc.demo.table.entity.StoredColumn;
-import org.swdc.demo.table.entity.StoredColumnType;
-import org.swdc.demo.table.entity.StoredFolder;
-import org.swdc.demo.table.entity.StoredTable;
+import org.swdc.demo.table.entity.*;
 import org.swdc.demo.table.repo.*;
 import org.swdc.demo.table.web.dtos.TableRequests;
 
@@ -133,6 +130,11 @@ public class StoreTableService {
             return null;
         }
 
+        StoredTable exists = repository.findByName(table.getTableName());
+        if (exists != null) {
+            return null;
+        }
+
         if (storedType == null || storedType < 0) {
             return null;
         }
@@ -168,6 +170,34 @@ public class StoreTableService {
         target.setColumns(cols);
         target = repository.save(target);
         return target.unManaged();
+    }
+
+    public List<StoredRowEntry> getEntries(String tableName, String columnName, String key) {
+        if (tableName == null || tableName.isBlank() || columnName == null || columnName.isBlank()){
+            return Collections.emptyList();
+        }
+        StoredTable table = repository.findByName(tableName);
+        if (table == null) {
+            return null;
+        }
+        StoredColumn target = null;
+        for (StoredColumn column: table.getColumns()) {
+            if (column.getName().equals(columnName)) {
+                target = column;
+                break;
+            }
+        }
+        if (target == null) {
+            return Collections.emptyList();
+        }
+        List<StoredRowEntry> entries = entryRepository.searchByValue(target.getId(),key);
+        if (entries == null) {
+            return Collections.emptyList();
+        }
+        return entries
+                .stream()
+                .map(StoredRowEntry::unManaged)
+                .collect(Collectors.toList());
     }
 
     public StoredTable getTable(Long id) {

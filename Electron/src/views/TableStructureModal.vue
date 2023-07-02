@@ -1,6 +1,6 @@
 <template>
-    <Modal :title="title" v-model="visible" @on-ok="submit">
-        <div style="height: 480px;max-height: 460px;overflow-y: scroll;overflow-x: hidden;padding: 12px;">
+    <Modal :title="title" width="80" v-model="visible" @on-ok="submit">
+        <div :style="{height: modalHeight + 'px', 'max-height': 'calc(' + modalHeight + 'px - 10px)'}" style="overflow-y: scroll;overflow-x: hidden;padding: 12px;">
             <Form label-position="top">
                 <FormItem v-for="(col, index) in columns" :label="col.name">
                      <component :is="col.type.editorId" v-model="model[col.id]"  :exp="col.type.descriptor" />
@@ -14,6 +14,8 @@
 import TextInputEditor from './editors/TextInputEditor';
 import CheckBoxesEditor from './editors/CheckBoxesEditor';
 import RadioBoxesEditor from './editors/RadioBoxesEditor';
+import SelectConnectedEditor from './editors/SelectConnectedEditor';
+import DateEditor from './editors/DateEditor';
 
 import { TableService } from '@/services/TableService';
 import { TableRow } from '@/services/TableRow';
@@ -23,7 +25,9 @@ export default {
     components: {
         TextInputEditor,
         CheckBoxesEditor,
-        RadioBoxesEditor
+        RadioBoxesEditor,
+        DateEditor,
+        SelectConnectedEditor
     },
     props: {
         table: {
@@ -39,14 +43,25 @@ export default {
             columns: [], 
             model : {},
             modelRules: {},
-            editingId: -1
+            editingId: -1,
+            modalHeight: window.innerHeight * 0.6,
+            resizeListener: null
         }
+    },
+    mounted() {
+        this.resizeListener = window.addEventListener("resize", () => {
+            this.modalHeight = window.innerHeight * 0.6;
+        })
+    },
+    unmounted() {
+        window.removeEventListener("resize", this.resizeListener);
     },
     computed: {
         title() {
             return this.editingId === -1 ? "添加..." : "修改...";
-        }
+        },
     },
+
     methods: {
         showEdit(row,columns) {
             if(this.visible || (!row instanceof TableRow)) {
@@ -84,6 +99,7 @@ export default {
                     this.visible = false;
                     this.columns = [];
                     this.model = {};
+                    this.$emit("refresh")
                 })
             } else {
                 const names = Object.getOwnPropertyNames(this.model);
@@ -98,6 +114,7 @@ export default {
                     this.visible = false;
                     this.columns = [];
                     this.model = {};
+                    this.$emit("refresh")
                 })
             }
         }

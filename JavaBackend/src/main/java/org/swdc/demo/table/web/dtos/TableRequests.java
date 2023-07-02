@@ -30,4 +30,15 @@ public class TableRequests {
 
     }
 
+    @Data
+    public static class TableColumnSearch {
+
+        private String tableName;
+
+        private String columnName;
+
+        private String key;
+
+    }
+
 }

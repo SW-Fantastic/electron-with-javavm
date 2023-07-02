@@ -66,4 +66,13 @@ export class TableService {
         },data)
     }
 
+    @Post("/tables/connectedSearch")
+    searchForData(tableName, columnName, keywords) {
+        return new NetRequest({}, {
+            tableName : tableName,
+            columnName: columnName,
+            key: keywords
+        })
+    } 
+
 }

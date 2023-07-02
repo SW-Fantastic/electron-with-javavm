@@ -20,7 +20,7 @@
                                 </FormItem>
                                 <FormItem>
                                     <Select style="width: 120px;" v-model="formAdd.editorType">
-                                        <Option v-for="(item, idx) in Object.getOwnPropertyNames(editorTypes)" :value="item">{{ editorTypes[item] }}</Option>
+                                        <Option v-for="(item, idx) in Object.getOwnPropertyNames(editorTypes)" :value="editorTypes[item].id">{{ editorTypes[item].name }}</Option>
                                     </Select>
                                 </FormItem>
                             </div>
@@ -42,9 +42,9 @@
                     </template>
                     <template #editorType="{row,index}">
                         <Select @click.stop  v-if="itemEditingIndex === index" style="width: 120px;" v-model="itemEditingEditor" @on-select="editorChanged">
-                            <Option v-for="(item, idx) in Object.getOwnPropertyNames(editorTypes)" :value="item">{{ editorTypes[item] }}</Option>
+                            <Option v-for="(item, idx) in Object.getOwnPropertyNames(editorTypes)" :value="editorTypes[item].id">{{ editorTypes[item].name }}</Option>
                         </Select>
-                        <span v-else>{{ editorTypes[row.editorId] }}</span>
+                        <span v-else>{{ editorTypes[row.editorId].name }}</span>
                     </template>
                 </Table>
             </div>
@@ -55,7 +55,7 @@
 import TableContextMenu from "./components/TableContextMenu";
 import { ColumnTypeService } from "../services/ColumnTypeService";
 
-import Editors from "./editors/Editors";
+import { Editors } from "./editors/Editors";
 
 export default {
     name: "EditDatatypeModal",
@@ -100,9 +100,7 @@ export default {
         };
     },
     mounted() {
-        for(const item of Editors) {
-            this.editorTypes[item.id] = item.name;
-        }
+        this.editorTypes = Editors;
     },
     computed: {
         tableMenu() {

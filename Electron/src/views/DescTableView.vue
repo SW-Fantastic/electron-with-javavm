@@ -106,11 +106,17 @@ export default {
         async refreshItem(selected) {
             const tableService = this.services.tableService;
             const resp = await tableService.getTable(selected.id); 
-            const idx = this.tableItems.indexOf(selected);
+            let index = -1;
+            for(let idx = 0; idx < this.tableItems.length; idx ++) {
+                if(this.tableItems[idx].id === selected.id) {
+                    index = idx;
+                    break;
+                }
+            }
             if(!resp.status === "Success") {
-                this.tableItems.splice(idx,1);
+                this.tableItems.splice(index,1);
             } else {
-                this.tableItems.splice(idx,1,resp.data);                    
+                this.tableItems.splice(index,1,resp.data);                    
             }
             return resp.data;
         },

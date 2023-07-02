@@ -4,14 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import org.swdc.demo.table.entity.StoredRow;
+import org.swdc.demo.table.entity.StoredRowEntry;
 import org.swdc.demo.table.entity.StoredTable;
 import org.swdc.demo.table.web.Result;
 import org.swdc.demo.table.web.dtos.TableRequests;
 import org.swdc.demo.table.web.service.StoreTableService;
 import org.swdc.demo.table.web.service.StoredRowService;
 
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @RestController
 @RequestMapping("/tables")
@@ -110,6 +110,23 @@ public class TableController {
             return Result.success(row);
         }
         return Result.failed("can not save the data");
+    }
+
+
+    @PostMapping("/connectedSearch")
+    public Result<List<StoredRowEntry>> loadConnectedColumnData(@RequestBody TableRequests.TableColumnSearch search) {
+        if (search == null || search.getColumnName() == null || search.getColumnName().isBlank() ||
+                search.getTableName() == null || search.getTableName().isBlank()) {
+            return Result.failed("invalid parameter");
+        }
+        if (search.getKey() == null || search.getKey().isBlank()) {
+            return Result.success(Collections.emptyList());
+        }
+        return Result.success(tableService.getEntries(
+                search.getTableName(),
+                search.getColumnName(),
+                search.getKey()
+        ));
     }
 
 }

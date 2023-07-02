@@ -14,4 +14,7 @@ public interface StoredTableRepository extends JpaRepository<StoredTable,Long> {
     @Query("from StoredTable st WHERE st.folder.id = :folderId")
     Page<StoredTable> findByFolderId(@Param("folderId")Long folderId, Pageable pageable);
 
+    @Query("from StoredTable WHERE tableName = :name")
+    StoredTable findByName(@Param("name") String name);
+
 }
