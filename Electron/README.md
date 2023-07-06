@@ -7,6 +7,8 @@
 
 这里是本项目的Electron部分
 
+> 另外，本项目的运行路径，不应该存在中文和特殊符号，否则Java应用可能无法正常载入。
+
 为了能方便的使用Vue，所以本项目采用了一个Vue的集成项目（Vue-Electron-Builder），此项目对Nodejs有版本要求，需要使用Nodejs 16版本，本项目采用yarn构建，虽然它同样可以使用NPM，
 但作者更建议使用Yarn，另外，Vue版本为Vue3。
 
