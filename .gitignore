@@ -10,3 +10,4 @@
 /Electron/logs/
 /Electron/node_modules/
 /Electron/dist_electron/
+/NativeVMBridge/Build/

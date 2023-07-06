@@ -5,10 +5,26 @@
 
 启动Java项目会导致线程阻塞，所以main方法请务必在Thread中执行。
 
-对于windows ：
+目前支持的系统：Window / MacOS
 
-如果需要编译此项目，请安装Visual Studio并且安装CMake，通过CMake编译本项目可以得到对应的动态链接库。
+编译使用的指令如下：
 
-对于其他系统：
+```
+mkdir Build
+cd Build
+cmake ..
+cmake --build . --config Release
+```
 
-暂时不支持，如果以后做了就会放上来。
+
+## Windows
+
+如果需要编译此项目，请安装Visual Studio并且安装CMake，通过CMake编译本项目可以得到对应的动态链接库，如果你想用使用cmake命令，请把CMake的安装目录下的bin文件夹加入系统的Path，重启终端或者命令提示符，你就能执行cmake命令了。
+
+## Mac OS
+
+如果需要编译此项目，请按照XCode，它将会提供CMake和相关的GCC工具链，通过CMake编译此项目可得到动态链接库。
+
+## Linux
+
+尚未支持。

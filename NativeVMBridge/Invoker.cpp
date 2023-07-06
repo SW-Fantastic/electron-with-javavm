@@ -1,10 +1,5 @@
-#include "external/jni.h"
-
+#include "Platform.h"
 #include <iostream>
-#include <tchar.h>
-#include <Windows.h>
-#include <stdlib.h>
-
 
 using namespace std;
 
@@ -12,7 +7,7 @@ typedef jint(JNICALL* JNICREATEPROC)(JavaVM**, void**, void*);
 
 JNIEnv* env;
 JavaVM* jvm;
-HINSTANCE jvmDLL;
+Handler jvmDLL;
 
 char* int_to_string(int val) {
 
@@ -28,7 +23,7 @@ char* int_to_string(int val) {
 	return buf;
 }
 
-extern "C" __declspec(dllexport) bool initialize(int udpReceiver, const char* classPath,const char* vmOptions, const char* mainClass)
+API_EXPORT bool initialize(int udpReceiver, const char* classPath,const char* vmOptions, const char* mainClass)
 {
 
 	if (jvm != NULL) {
@@ -136,7 +131,7 @@ extern "C" __declspec(dllexport) bool initialize(int udpReceiver, const char* cl
 	return true;
 }
 
-extern "C" __declspec(dllexport) void destroy() {
+API_EXPORT void destroy() {
 
 	if (jvm != NULL) {
 		jvm->DestroyJavaVM();
