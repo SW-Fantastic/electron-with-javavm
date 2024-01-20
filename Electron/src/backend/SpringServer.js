@@ -27,7 +27,7 @@ export class SpringServer {
             this.serverDispatcher = null;
         }
         this.native = Ffi.Library(Path.join(Process.cwd(),"BackendAPI.dll"),{
-            initialize:["bool", ["int", "string", "string", "string"]],
+            initialize:["int", ["int","string","string","string","string"]],
             destroy:["bool",["void"]],
         })
     }
@@ -60,12 +60,13 @@ export class SpringServer {
      * @returns 
      */
     initializeBackendVM() {
+
         if(!this.serverDispatcher) {
             return;
         }
         // JVM的VMOptions，jvm的内存调整什么的可能需要。
         const vmOptions = [
-            "-Xmx=1024M"
+           "-javaagent:" + Path.join(Process.cwd(),"agentDemo-1.0-SNAPSHOT.jar")
         ];
         // 枚举jar文件
         const rst = this.getClassPath(Path.join(Process.cwd(), "backend/service"));
@@ -74,12 +75,14 @@ export class SpringServer {
         return this.native.initialize(
             // UDP端口号
             this.serverDispatcher.port,
+            // JavaRuntime的二进制文件路径，一般没有必要修改。
+            Path.join(Process.cwd(),"backend/bin"),
             // 类路径
             cp,
             // VMOptions
             vmOptions.join("\n"),
             // Main Class
-            "org/springframework/boot/loader/JarLauncher"
+            "org/springframework/boot/loader/launch/JarLauncher"
         )
     }
 

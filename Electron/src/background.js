@@ -49,6 +49,7 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
   }
+
   const server = new SpringServer(false);
   server.destroyBackendVM();
 })

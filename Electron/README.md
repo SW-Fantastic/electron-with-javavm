@@ -5,7 +5,7 @@
 本项目的是一个演示项目，它展示了如何将Electron和一个Java后端集成在一起，它的原理是通过Node-FFI-NAPI调用Native层
 ，通过它启动一个Java虚拟机并且加载Java应用。
 
-这里是本项目的Electron部分
+这里是本项目的Electron部分，本项目使用Nodejs 14。
 
 > 另外，本项目的运行路径，不应该存在中文和特殊符号，否则Java应用可能无法正常载入。
 
@@ -27,3 +27,4 @@
 但是打包完成后，记得复制Backend和BackendAPI的动态库到打包后的目录中。
 
 关于这部分，Release中将会存在一个打包完毕的Demo可供参考。
+

@@ -11,3 +11,4 @@
 /Electron/node_modules/
 /Electron/dist_electron/
 /NativeVMBridge/Build/
+/Electron/napi.log

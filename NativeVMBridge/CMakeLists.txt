@@ -4,3 +4,4 @@ project(BackendAPI)
 set (CMAKE_CONFIGURATION_TYPES "Release")
    
 add_library(BackendAPI SHARED Invoker.cpp)
+add_executable(Test Test.cpp)

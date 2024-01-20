@@ -1,5 +1,6 @@
 #include "Platform.h"
 #include <iostream>
+#include <fstream>
 
 using namespace std;
 
@@ -8,6 +9,8 @@ typedef jint(JNICALL* JNICREATEPROC)(JavaVM**, void**, void*);
 JNIEnv* env;
 JavaVM* jvm;
 Handler jvmDLL;
+
+ofstream ofsLogger;
 
 char* int_to_string(int val) {
 
@@ -23,53 +26,65 @@ char* int_to_string(int val) {
 	return buf;
 }
 
-API_EXPORT bool initialize(int udpReceiver, const char* classPath,const char* vmOptions, const char* mainClass)
+API_EXPORT int initialize(int udpReceiver, const char* vmLocation, const char* classPath,const char* vmOptions, const char* mainClass)
 {
 
 	if (jvm != NULL) {
 		return true;
 	}
 
-        // 加载JVM的动态库
-	jvmDLL = LoadLibrary(_T("backend/bin/server/jvm.dll"));
+	ofsLogger.open("napi.log",ios::out);
+
+// 加载JVM的动态库
+#ifdef _WIN32
+	ofsLogger << "vmPath: " << vmLocation << endl;
+	SetDllDirectory(vmLocation);
+	jvmDLL = LoadLibrary(_T("server/jvm.dll"));
+#endif
+#ifdef __APPLE__
+	jvmDLL = LoadLibrary(_T("backend/bin/server/jvm.dylib"));
+#endif
 	if (jvmDLL == NULL) {
-		cout << "[VM Initializer] Error on loading java vm native library" << endl;
-		return false;
+		ofsLogger << "[VM Initializer] Error on loading java vm native library" << endl;
+		ofsLogger.close();
+		return -1;
 	}
 
 	//初始化jvm物理地址
 	JNICREATEPROC jvmProcAddress = (JNICREATEPROC)GetProcAddress(jvmDLL, "JNI_CreateJavaVM");
 	if (jvmProcAddress == NULL) {
 		FreeLibrary(jvmDLL);
-		cout << "[VM Initializer] Error on loading, can not find create vm method." << endl;
-		return false;
+		ofsLogger << "[VM Initializer] Error on loading, can not find create vm method." << endl;
+		ofsLogger.close();
+		return -2;
 	}
 
 	//java虚拟机启动时接收的参数，每个参数单独一项
-	
 
 	int nOptionCount = 0;
-
 	char* options[50] = { NULL };
 	char* currentOpt = NULL;
+
 	if (vmOptions != NULL) {
 
 		int lenOptions = strlen(vmOptions);
-		char* vmOptionsStr = new char[lenOptions];
-		memcpy(vmOptionsStr, vmOptions, lenOptions - 1);
+		char* vmOptionsStr = new char[lenOptions + 1];
+		memcpy(vmOptionsStr, vmOptions, lenOptions);
+		vmOptionsStr[lenOptions] = '\0';
 
 		currentOpt = strtok(vmOptionsStr, "\n");
 		while (currentOpt) {
+			ofsLogger << "opt:" << currentOpt << endl;
 			options[nOptionCount++] = currentOpt;
 			currentOpt = strtok(NULL, "\n");
 		}
 	}
-	
+
 	JavaVMOption* vmOption = new JavaVMOption[nOptionCount + 1];
-	for (int idx = 1; idx < nOptionCount; idx++) {
+	for (int idx = 0; idx < nOptionCount; idx++) {
 		JavaVMOption opt;
 		opt.optionString = options[idx];
-		vmOption[idx] = opt;
+		vmOption[idx + 1] = opt;
 	}
 
 	//设置classpath
@@ -78,15 +93,14 @@ API_EXPORT bool initialize(int udpReceiver, const char* classPath,const char* vm
 	classPathOpt.optionString = (char*)opt.c_str();
 	vmOption[0] = classPathOpt;
 
-	cout << "Classpath is " << opt << endl;
+	ofsLogger << "Classpath is " << opt << endl;
 
 	JavaVMInitArgs vmInitArgs;
 	vmInitArgs.version = JNI_VERSION_1_8;
 	vmInitArgs.options = vmOption;
-	vmInitArgs.nOptions = nOptionCount;
+	vmInitArgs.nOptions = nOptionCount + 1;
 	//忽略无法识别jvm的情况
 	vmInitArgs.ignoreUnrecognized = JNI_TRUE;
-
 	
 	/*
 	* 这里的异常是JVM主动生成，不需要理会它。
@@ -99,21 +113,24 @@ API_EXPORT bool initialize(int udpReceiver, const char* classPath,const char* vm
 	if (jvmProc < 0 || jvm == NULL || env == NULL) {
 		FreeLibrary(jvmDLL);
 		jvmDLL = NULL;
-		cout << "[VM Initializer] Error on creating java environment , failed to init Java VM" << endl;
-		return false;
+		ofsLogger << "[VM Initializer] Error on creating java environment , failed to init Java VM" << endl;
+		ofsLogger.close();
+		return -3;
 	}
     // 查找和加载MainClass
 	jclass mainClazz = env->FindClass(mainClass);
 	if (mainClazz == NULL) {
-		cout << "[VM Initializer] Error on starting java backend, Class not found." << endl;
-		return false;
+		ofsLogger << "[VM Initializer] Error on starting java backend, Class not found." << endl;
+		ofsLogger.close();
+		return -4;
 	}
     
 	// 查找Main方法
 	jmethodID init = env->GetStaticMethodID(mainClazz, "main", "([Ljava/lang/String;)V");
 	if (init == NULL) {
-		cout << "[VM Initializer] Error on starting java backend, main method not found." << endl;
-		return false;
+		ofsLogger << "[VM Initializer] Error on starting java backend, main method not found." << endl;
+		ofsLogger.close();
+		return -5;
 	}
 
     // 我将使用UDP来实现后端到前端的消息通信，因此需要一个UDP端口，
@@ -128,7 +145,8 @@ API_EXPORT bool initialize(int udpReceiver, const char* classPath,const char* vm
 	env->CallStaticVoidMethod(mainClazz, init, params);
 	cout << "[VM Initializer] Service is ready." << endl;
 	delete recvStr;
-	return true;
+	ofsLogger.close();
+	return 0;
 }
 
 API_EXPORT void destroy() {

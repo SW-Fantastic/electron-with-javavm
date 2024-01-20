@@ -11,7 +11,7 @@ window.listenBackendEvent = function(typeName, callback) {
 }
 
 window.initializeBackend = function() {
-    TheServer.initializeBackendVM();
+   TheServer.initializeBackendVM();
 }
 
 window.destroyBackend = function() {
